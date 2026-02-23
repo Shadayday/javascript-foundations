@@ -29,4 +29,10 @@ input.value = "";
 
 });
 
+input.addEventListener("keydown", function(event){
+    if (event.key=== "Enter") {
+        button.click();
+    }
+});
+
 
