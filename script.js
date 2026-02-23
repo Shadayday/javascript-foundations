@@ -1,3 +1,4 @@
+console.log("script.js loaded");
 const input = document.getElementById("taskInput");
 const button = document.getElementById("addTaskBtn");
 const list = document.getElementById("taskList");
@@ -12,24 +13,39 @@ if (savedTasks) {
     
 }
 
+//Render function
 function renderTasks() {
     list.innerHTML = "";
 
-    tasks.forEach(function (task) {
+    tasks.forEach(function (task, index) {
         const li = document.createElement("li");
-        li.textContent = task;
+        
+        const span = document.createElement("span");
+        span.textContent = task;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+
+        deleteBtn.addEventListener("click", function () {
+            tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            renderTasks();
+        });
+
+        li.appendChild(span);
+        li.appendChild(deleteBtn);
         list.appendChild(li);
     });
 }
 
+//Initial render
 renderTasks();
 
+//Add task
 button.addEventListener("click", function() {
 
 // 1. Get the value from the input    
 const taskText = input.value.trim();
-
-console.log(taskText);
 
 // 2. If input is empty, do nothing
 if (taskText === "") {
@@ -38,9 +54,8 @@ if (taskText === "") {
 }
 
 tasks.push(taskText);
-
+console.log(taskText);
 localStorage.setItem("tasks", JSON.stringify(tasks));
-
 renderTasks();
 
 // 3. Create a new <li> element
@@ -57,11 +72,9 @@ input.value = "";
 
 });
 
+//Enter key support
 input.addEventListener("keydown", function(event){
     if (event.key=== "Enter") {
         button.click();
     }
 });
-
-document.body.style.backgroundColor = "lightblue";
-
