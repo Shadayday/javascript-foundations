@@ -53,10 +53,22 @@ if (taskText === "") {
 
 }
 
+//Prevent duplicates (case-insensitive)
+const alreadyExists = tasks.some(function (t){
+    return t.toLowerCase() === taskText.toLowerCase();
+});
+
+if (alreadyExists) {
+    alert("That task already exists.");
+    input.value ="";
+    return;
+}
+
 tasks.push(taskText);
 console.log(taskText);
 localStorage.setItem("tasks", JSON.stringify(tasks));
 renderTasks();
+input.value = "";
 
 // 3. Create a new <li> element
 //const li = document.createElement("li");
