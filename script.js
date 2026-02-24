@@ -4,11 +4,19 @@ const input = document.getElementById("taskInput");
 const button = document.getElementById("addTaskBtn");
 const list = document.getElementById("taskList");
 
+const filterAllBtn = document.getElementById("filterAllBtn");
+const filterActiveBtn = document.getElementById("filterActiveBtn");
+const filterCompletedBtn = document.getElementById("filterCompletedBtn");
+const clearCompletedBtn = document.getElementById("clearCompletedBtn");
+const stats = document.getElementById("stats")
+
 let tasks = [];
 
 // Edit state
 let editingIndex = null;
 let editingText = "";
+
+let currentFilter = "all"; //"all" | "active" | "completed"
 
 // -------------------- Storage helpers --------------------
 function saveTasks() {
@@ -65,17 +73,30 @@ function saveEdit(index, newText) {
 function renderTasks() {
   list.innerHTML = "";
 
-  tasks.forEach((task, index) => {
+  // Stats
+  const total = tasks.length;
+  const completedCount = tasks.filter(t => t.completed).length;
+  const activeCount = total - completedCount;
+  stats.textContent = `${total} total - ${activeCount} active - ${completedCount} completed`;
+
+  // Filtered view
+  const visibleTasks = tasks
+    .map((task, index) => ({task, index})) // keep original index for edit/delete
+    .filter(({ task }) => {
+      if (currentFilter === "active") return !task.completed;
+      if (currentFilter ==="completed") return task.completed;
+      return true; // all
+    });
+
+  visibleTasks.forEach(({ task, index }) => {
     const li = document.createElement("li");
 
-    // Left side container
     const left = document.createElement("div");
     left.style.display = "flex";
-    left.style.alignItems = "center";
+    left.style.alignItems = "centre";
     left.style.gap = "10px";
     left.style.flex = "1";
 
-    // Checkbox (complete)
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = task.completed;
@@ -90,20 +111,15 @@ function renderTasks() {
 
     // Editing mode
     if (editingIndex === index) {
-      const editInput = document.createElement("input");
+      const editInput = document.createElement ("input");
       editInput.type = "text";
       editInput.value = editingText;
       editInput.style.flex = "1";
 
-      // Save on Enter / Cancel on Esc
       editInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          saveEdit(index, editInput.value);
-        } else if (event.key === "Escape") {
-          cancelEdit();
-        }
+        if (event.key === "Enter") saveEdit(index, editInput.value);
+        if (event.key === "Escape") cancelEdit();
       });
-
       left.appendChild(editInput);
 
       const saveBtn = document.createElement("button");
@@ -119,21 +135,19 @@ function renderTasks() {
       li.appendChild(cancelBtn);
       list.appendChild(li);
 
-      // Focus the input after it’s on the page
       setTimeout(() => editInput.focus(), 0);
       return;
     }
 
-    // Normal view text
     const span = document.createElement("span");
     span.textContent = task.text;
 
     if (task.completed) {
       span.style.textDecoration = "line-through";
       span.style.opacity = "0.6";
-    }
-
-    left.appendChild(span);
+  }
+   
+  left.appendChild(span);
 
     // Right side buttons
     const editBtn = document.createElement("button");
@@ -148,10 +162,7 @@ function renderTasks() {
     deleteBtn.textContent = "Delete";
     deleteBtn.addEventListener("click", () => {
       // If you delete the one you're editing, exit edit mode safely
-      if (editingIndex === index) {
-        editingIndex = null;
-        editingText = "";
-      }
+      if (editingIndex === index) cancelEdit();
       tasks.splice(index, 1);
       saveTasks();
       renderTasks();
@@ -163,6 +174,30 @@ function renderTasks() {
     list.appendChild(li);
   });
 }
+
+filterAllBtn.addEventListener("click", () => {
+  currentFilter = "all";
+  renderTasks();
+});
+
+filterActiveBtn.addEventListener("click", () => {
+  currentFilter = "active";
+  renderTasks();
+});
+
+filterCompletedBtn.addEventListener("click", () => {
+  currentFilter = "completed";
+  renderTasks();
+});
+
+clearCompletedBtn.addEventListener("click", () => {
+  tasks = tasks.filter(t => !t.completed);
+  saveTasks();
+
+  // If you were editing something that got removed, exit edit mode safely
+  cancelEdit();
+  renderTasks();
+});
 
 // -------------------- Add task --------------------
 button.addEventListener("click", () => {
