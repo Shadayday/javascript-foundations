@@ -192,15 +192,22 @@ function renderTasks() {
       swapTasks(index, index + 1);
     });
 
-    li.appendChild(upBtn);
-    li.appendChild(downBtn);
+    // after creating upBtn/downBtn and setting disabled = index ===...
+    upBtn.disabled = upBtn.disabled || editingIndex !== null;
+    downBtn.disabled = downBtn.disabled || editingIndex !== null;
+
+    // Only show reorder buttons in "all" view
+    if (currentFilter === "all"){
+      li.appendChild(upBtn);
+      li.appendChild(downBtn);
+    }
+    
     li.appendChild(left);
     li.appendChild(editBtn);
     li.appendChild(deleteBtn);
     list.appendChild(li);
   });
 }
-console.log({ clearAllBtn })
 
 filterAllBtn.addEventListener("click", () => {
   currentFilter = "all";
