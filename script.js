@@ -8,7 +8,9 @@ const filterAllBtn = document.getElementById("filterAllBtn");
 const filterActiveBtn = document.getElementById("filterActiveBtn");
 const filterCompletedBtn = document.getElementById("filterCompletedBtn");
 const clearCompletedBtn = document.getElementById("clearCompletedBtn");
+const clearAllBtn = document.getElementById("ClearAllBtn");
 const stats = document.getElementById("stats")
+
 
 let tasks = [];
 
@@ -38,6 +40,14 @@ function loadTasks() {
   });
 
   saveTasks();
+}
+
+function swapTasks(i, j) {
+  const temp = tasks [i];
+  tasks[i] = tasks[j];
+  tasks[j] = temp;
+  saveTasks();
+  renderTasks();
 }
 
 // -------------------- Edit helpers --------------------
@@ -168,12 +178,29 @@ function renderTasks() {
       renderTasks();
     });
 
+    const upBtn =document.createElement("button");
+    upBtn.textContent = "↑";
+    upBtn.disabled = index === 0;
+    upBtn.addEventListener("click", () => {
+      swapTasks(index, index - 1);
+    });
+
+    const downBtn = document.createElement("button");
+    downBtn.textContent = "↓";
+    downBtn.disabled = index === tasks.length - 1;
+    downBtn.addEventListener("click", () => {
+      swapTasks(index, index + 1);
+    });
+
+    li.appendChild(upBtn);
+    li.appendChild(downBtn);
     li.appendChild(left);
     li.appendChild(editBtn);
     li.appendChild(deleteBtn);
     list.appendChild(li);
   });
 }
+console.log({ clearAllBtn })
 
 filterAllBtn.addEventListener("click", () => {
   currentFilter = "all";
@@ -198,6 +225,19 @@ clearCompletedBtn.addEventListener("click", () => {
   cancelEdit();
   renderTasks();
 });
+if (clearAllBtn) {
+clearAllBtn.addEventListener("click", () => {
+  if (tasks.length === 0) return;
+
+  const ok = confirm("Clear all tasks? This cannot be undone.");
+  if (!ok) return;
+
+  tasks = [];
+  saveTasks();
+  cancelEdit(); // exits edit mode safely
+  renderTasks();
+});
+}
 
 // -------------------- Add task --------------------
 button.addEventListener("click", () => {
